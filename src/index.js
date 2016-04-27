@@ -1,6 +1,14 @@
-import {Observable as O} from 'rx'
-import {createDriver} from 'cycle-async-driver'
+import {makeAsyncDriver} from 'cycle-async-driver'
 import mongoose from 'mongoose'
+
+const objToCall = (context, obj) => {
+  let method = Object.keys(obj)[0]
+  if (!context[method]){
+    throw new Error(`Object has no method ${method}`)
+  }
+  let args = Array.isArray(obj[method]) ? obj[method] : [obj[method]]
+  return context[method].apply(context, args)
+}
 
 export function makeMongooseDriver (url, options) {
   if (typeof url === 'object'){
@@ -16,53 +24,59 @@ export function makeMongooseDriver (url, options) {
     db = url
   }
 
-  return createDriver((request) => 
-    O.create(observer => {
-      var modelName = request.Model
-      var Model
-      if (typeof modelName == 'string'){
-        Model = db.model(modelName)
+  return makeAsyncDriver((request, cb) => {
+    let modelName = request.Model
+    let Model
+    if (typeof modelName == 'string'){
+      Model = db.model(modelName)
+    } else {
+      modelName = ''
+      Model = modelName
+    }
+
+    if (!Model){
+      throw Error (`Unknown model ${modelName}`)
+    }
+
+    if (typeof request.create == 'object'){
+      return Model.create(request.create)
+    }
+
+    if (typeof request.remove == 'object'){
+      Model.remove(request.remove)
+    }
+
+    let requestQuery = request.query || request.exec
+    let queryChain
+
+    if (typeof requestQuery == 'object') {
+      if (!Array.isArray(requestQuery)){
+        requestQuery = [requestQuery]
+      }
+      queryChain = requestQuery.reduce(objToCall, Model)
+    } else if (typeof requestQuery == 'function') {
+      queryChain = requestQuery.call(null, Model)
+    }
+
+    if (queryChain){
+      if (queryChain.then){
+        return queryChain
+      } else if (typeof queryChain.exec === 'function'){
+        queryChain.exec()
       } else {
-        modelName = ''
-        Model = modelName
+        throw Error (`Request for model ${modelName} contains illegal chain query`)
       }
-      
-      if (!Model){
-        throw new Error(`Could get Model ${modelName}`)
-      }
+    }
 
-      var callback = (err, data) => 
-        err ? observer.onError(err) : observer.onNext(data)       
+    let cbMethod = Object.keys(request)
+      .filter(key => typeof Model[key] === 'function')[0]
 
-      if (typeof request.create == 'object'){
-        Model.create(request.create, callback)
-      } else if (typeof request.remove == 'object'){
-        Model.remove(request.remove, callback)
-      } else if (typeof request.query == 'function' || typeof request.exec == 'function'){
-        let q = (request.query || request.exec)(Model)
-        // check if promise returned
-        if (q.then){
-          q.then((result) => {
-            callback(null, result)
-          }, callback)
-        } else if (q.exec){
-           q.exec(callback)
-        } else {
-          throw new Error(`Illegal mongoose query for model ${modelName}`)
-        }
-      } else {
-        // TODO: this probably should be removed
-        // if no query, look for method
-        let method = Object.keys(query).filter(key => Model[key])[0]
-        var params = query[method]
-        params = Array.isArray(params) ? params : [params]
-        params = params.concat(callback)
+    if (cbMethod){
+      let cbObj = {[cbMethod]:
+        [].concat(request[cbMethod]).concat(cb)}
+      return objToCall(Model, cbObj)
+    }
 
-        if (!Model[method]){
-          throw new Error(`Could not find method ${method} for Model ${modelName}`)
-        }
-        Model[method].apply(Model, params)
-      }
-    })
-  )
+    throw new Error(`Request for model ${modelName} does not contain valid instructions`)
+  })
 }
