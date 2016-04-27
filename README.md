@@ -4,7 +4,7 @@ Mongoose.js driver for [Cycle.js](http://cycle.js.org/). Tested and ready.
 ```js
 import {makeMongooseDriver} from 'cycle-mongoose'
 import mongoose from 'mongoose'
-import {just, merge} from 'rx-factory
+import {just, merge} from 'rx-factory'
 
 const schema = mongoose.Schema({name: 'string'})
 schema.statics.customFindById = function (id, cb) {
