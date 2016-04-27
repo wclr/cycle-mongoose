@@ -10,15 +10,12 @@ const objToCall = (context, obj) => {
   return context[method].apply(context, args)
 }
 
-export function makeMongooseDriver (url, options) {
-  let db
-  if (typeof url === 'string'){
-    db  = mongoose.createConnection(url, options)
-  } else if (url && typeof url.model === 'function'){
-    db = url
-  } else {
-    throw new Error(`You should provide either url with connection options,` +
-    `or already created connection object`)
+export const makeMongooseDriver = (db, options) => {
+  if (typeof db === 'string'){
+    db  = mongoose.createConnection(db, options)
+  } else if (!db || typeof db.model !== 'function'){
+    throw new Error(`You should provide either url with` +
+      `connection options, or already created connection object`)
   }
 
   return makeAsyncDriver((request, cb) => {
@@ -32,15 +29,7 @@ export function makeMongooseDriver (url, options) {
     }
 
     if (!Model){
-      throw Error (`Unknown model ${modelName}`)
-    }
-
-    if (typeof request.create == 'object'){
-      return Model.create(request.create)
-    }
-
-    if (typeof request.remove == 'object'){
-      Model.remove(request.remove)
+      throw Error(`Unknown model ${modelName}`)
     }
 
     let requestQuery = request.query || request.exec
@@ -61,7 +50,7 @@ export function makeMongooseDriver (url, options) {
       } else if (typeof queryChain.exec === 'function'){
         queryChain.exec()
       } else {
-        throw Error (`Request for model ${modelName} contains illegal chain query`)
+        throw Error(`Request for model ${modelName} contains illegal chain query`)
       }
     }
 

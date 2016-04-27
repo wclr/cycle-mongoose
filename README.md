@@ -28,7 +28,7 @@ var main = ({db}) => {
 }
 
 run(main{
-  db: makeMongooseDriver(MONGO__URL, /* connection options */)
+  db: makeMongooseDriver(MONGO_URL, /* connection options */)
 })
 
 ```

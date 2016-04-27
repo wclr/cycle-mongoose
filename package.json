@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "mongoose": "^4.4.0",
-    "cycle-async-driver": "^1.0.0"
+    "cycle-async-driver": "^1.2.0"
   },
   "devDependencies": {
     "@cycle/core": "^6.0.0",
