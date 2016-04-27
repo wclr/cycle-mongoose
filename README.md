@@ -1,5 +1,5 @@
 # Mongoose-cycle
-Mongoose.js driver for Cycle.js. Tested and ready.
+Mongoose.js driver for [Cycle.js](http://cycle.js.org/). Tested and ready.
 
 ```js
 import mongoose from 'mongoose'
@@ -14,18 +14,19 @@ var main = ({db}) => {
   return {
     db: merge([
       just('1234').map(id => ({
-        Model: 'TestModel', findById: id // simple
+        Model: 'TestModel', 
+        customFindById: id // simple method in query with param
       })),
       just('1234').map(id => ({
         Model: 'TestModel', 
-        query: [{findById: id}, {select: 'name'}] // chain
+        query: [{findById: id}, {select: 'name'}] // chain of methods
       }))
     ])
   }
 }
 
 run(main{
-  db: makeMongooseDriver('mongodb://localhost/mongoose-cycle-driver-test')
+  db: makeMongooseDriver(MONGO__URL, /* connection options */)
 })
 
 ```
