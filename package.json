@@ -1,7 +1,8 @@
 {
   "name": "cycle-mongoose",
   "version": "1.0.0",
-  "description": "",
+  "description": "Mongoose.js driver for Cycle.js.",
+  "keywords": ["mongodb", "mongoose", "cyclejs", "driver"],
   "main": "lib/index.js",
   "scripts": {
     "clean": "rimraf lib",
