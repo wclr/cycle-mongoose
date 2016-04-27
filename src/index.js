@@ -11,17 +11,14 @@ const objToCall = (context, obj) => {
 }
 
 export function makeMongooseDriver (url, options) {
-  if (typeof url === 'object'){
-    options = url
-    url = options.url || options.db
-  }
-  var db
-  options = options || {}
-
+  let db
   if (typeof url === 'string'){
     db  = mongoose.createConnection(url, options)
-  } else {
+  } else if (url && typeof url.model === 'function'){
     db = url
+  } else {
+    throw new Error(`You should provide either url with connection options,` +
+    `or already created connection object`)
   }
 
   return makeAsyncDriver((request, cb) => {
