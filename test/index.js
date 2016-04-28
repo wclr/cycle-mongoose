@@ -8,7 +8,7 @@ const schema = mongoose.Schema({name: 'string'})
 schema.statics.customFindById = function (id, cb) {
   this.findById(id, cb)
 }
-var Model = mongoose.model('TestModel', schema)
+mongoose.model('TestModel', schema)
 
 var db = makeMongooseDriver('mongodb://localhost/mongoose-cycle-driver-test')
 
@@ -25,19 +25,19 @@ test('Request API', {timeout: 1000}, (t) => {
       .subscribe(x => t.ok(x, 'request contains findById method returning promise'))
 
     db.select({customFindById: _ => _}).mergeAll()
-      .subscribe(x => t.ok(x, 'request contains custom model method with callback'))
+      .subscribe(x => t.ok(x, 'request contains custom method (with callback)'))
 
     db.select('queryArray').mergeAll()
-      .subscribe(x => t.ok(x, 'query is array (chain)'))
+      .subscribe(x => t.ok(x, 'query is array (chain) of method calls'))
 
     db.select('queryObj').mergeAll()
-      .subscribe(x => t.ok(x, 'query is object (single method)'))
+      .subscribe(x => t.ok(x, 'query is an object (single method call)'))
 
     db.select('queryFuncToExec').mergeAll()
-      .subscribe(x => t.ok(x, 'query is function to exec()'))
+      .subscribe(x => t.ok(x, 'query is a function for exec()'))
 
     db.select('queryFuncPromise').mergeAll()
-      .subscribe(x => t.ok(x, 'query is function returning promise'))
+      .subscribe(x => t.ok(x, 'query is a function returning promise'))
 
     db.select({remove: _ => _}).mergeAll()
       .subscribe(x => {

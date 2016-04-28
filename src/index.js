@@ -35,12 +35,12 @@ export const makeMongooseDriver = (db, options) => {
     let requestQuery = request.query || request.exec
     let queryChain
 
-    if (typeof requestQuery == 'object') {
+    if (typeof requestQuery === 'object') {
       if (!Array.isArray(requestQuery)){
         requestQuery = [requestQuery]
       }
       queryChain = requestQuery.reduce(objToCall, Model)
-    } else if (typeof requestQuery == 'function') {
+    } else if (typeof requestQuery === 'function') {
       queryChain = requestQuery.call(null, Model)
     }
 
