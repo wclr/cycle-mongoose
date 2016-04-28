@@ -42,7 +42,8 @@ const SendVerificationEmails = ({db, emails, schedule}) => {
 run(SendVerificationEmails, {
   schedule: scheduleDriver,
   emails: emailsDriver,
-  db: makeMongooseDriver(MONGO_URL, /* connection options */)
+  db: makeMongooseDriver(MONGO_URL, /* connection options */),
+  log: (message$) => message$.forEach(::console.log) 
 })
 ```
 
