@@ -1,25 +1,18 @@
 import {makeAsyncDriver} from 'cycle-async-driver'
 import mongoose from 'mongoose'
 
-const objToCall = (context, obj) => {
+const turnObjectToCall = (context, obj) => {
   let method = Object.keys(obj)[0]
-  if (!context[method]){
+  if (typeof context[method] !== 'function'){
     throw new Error(`Object has no method ${method}`)
   }
   let args = Array.isArray(obj[method]) ? obj[method] : [obj[method]]
   return context[method].apply(context, args)
 }
 
-export const makeMongooseDriver = (db, options) => {
-  if (typeof db === 'string'){
-    db  = mongoose.createConnection(db, options)
-  } else if (!db || typeof db.model !== 'function'){
-    throw new Error(`You should provide either url with` +
-      `connection options, or already created connection object`)
-  }
-
-  return makeAsyncDriver((request, cb) => {
-    let modelName = request.Model
+export const makeGetResponse = (db) =>
+  (request, cb) => {
+    let modelName = request.Model || request.model
     let Model
     if (typeof modelName == 'string'){
       Model = db.model(modelName)
@@ -39,7 +32,7 @@ export const makeMongooseDriver = (db, options) => {
       if (!Array.isArray(requestQuery)){
         requestQuery = [requestQuery]
       }
-      queryChain = requestQuery.reduce(objToCall, Model)
+      queryChain = requestQuery.reduce(turnObjectToCall, Model)
     } else if (typeof requestQuery === 'function') {
       queryChain = requestQuery.call(null, Model)
     }
@@ -64,5 +57,15 @@ export const makeMongooseDriver = (db, options) => {
     }
 
     throw new Error(`Request for model ${modelName} does not contain valid instructions`)
-  })
+  }
+
+export const makeMongooseDriver = (db, options) => {
+  if (typeof db === 'string'){
+    db  = mongoose.createConnection(db, options)
+  } else if (!db || typeof db.model !== 'function'){
+    throw new Error(`You should provide either url with` +
+      `connection options, or already created connection object`)
+  }
+
+  return makeAsyncDriver(makeGetResponse(db))
 }
