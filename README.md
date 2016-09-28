@@ -4,7 +4,7 @@ Mongoose.js driver for [Cycle.js](http://cycle.js.org/). Tested and ready.
 ###  (Almost) real world example: 
 ```js
 import {run} from '@cycle/core'
-import {makeMongooseDriver} from 'cycle-mongoose'
+import {makeMongooseDriver} from '@cycle-drivers/mongoose'
 import {from, merge} from 'rx-factory'
 
 const SendVerificationEmails = ({db, emails, schedule}) => {

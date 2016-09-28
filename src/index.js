@@ -53,7 +53,7 @@ export const makeGetResponse = (db) =>
     if (cbMethod){
       let cbObj = {[cbMethod]:
         [].concat(request[cbMethod]).concat(cb)}
-      return objToCall(Model, cbObj)
+      return turnObjectToCall(Model, cbObj)
     }
 
     throw new Error(`Request for model ${modelName} does not contain valid instructions`)

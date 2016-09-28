@@ -1,8 +1,13 @@
 {
   "name": "cycle-mongoose",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Mongoose.js driver for Cycle.js.",
-  "keywords": ["mongodb", "mongoose", "cyclejs", "driver"],
+  "keywords": [
+    "mongodb",
+    "mongoose",
+    "cyclejs",
+    "driver"
+  ],
   "main": "lib/index.js",
   "scripts": {
     "clean": "rimraf lib",
@@ -16,7 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "mongoose": "^4.4.0",
-    "cycle-async-driver": "^1.2.0"
+    "cycle-async-driver": "^1.4.0"
   },
   "devDependencies": {
     "@cycle/core": "^6.0.0",
